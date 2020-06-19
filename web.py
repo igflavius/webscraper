@@ -13,7 +13,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--ip", dest="ip", help='ip list file', required=True)
     parser.add_argument("-u", "--uri", dest="path", help='uri list file', required=True)
-    parser.add_argument("-l", "--log", help="log file", required=True)
+    parser.add_argument("-l", "--log", dest="log", help="log file", required=True)
+    parser.add_argument("-p", "--port", dest="port", help="port number")
+    parser.add_argument("-s", "--ssl", dest="ssl", help="use ssl or no")
     args = parser.parse_args()
 
     scanner(args.ip, args.path, args.log)
@@ -25,7 +27,7 @@ def debug(info, log):
 def scanner(ip, path, log):
 
     headers = requests.utils.default_headers()
-    headers.update({'User-Agent': 'Mozilla/5.0 (Linux; Android 10; LM-Q710(FGN)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36'})
+    headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'})
 
     match = ["Default Web Site Page", "It works!", "Univention Portal"]
 
@@ -33,8 +35,8 @@ def scanner(ip, path, log):
             for url, uri in itertools.product(f1, f2):
                 (url, uri) = url.rstrip(), uri.rstrip()
                 try:
-                    req = requests.get(url + uri, headers=headers, timeout=3, verify=False)
-                    session = requests.session(url)
+                    req = requests.get(url + uri, headers=headers, timeout=3, allow_redirects=True, verify=False)
+                    session = requests.session()
                     soup = BeautifulSoup(req.text, 'html.parser')
 
                     if soup.findAll(string=match):
