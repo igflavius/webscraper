@@ -6,13 +6,14 @@ import logging
 import itertools
 import threading
 import queue
+import sys
 from bs4 import BeautifulSoup as BS
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def scanner():
     
-    logging.basicConfig(format='%(message)s', filename=arg.log, level=logging.INFO)
+    logging.basicConfig(format='%(message)s', level=logging.INFO, handlers=[logging.FileHandler(arg.log), logging.StreamHandler(sys.stdout)])
 
     headers = requests.utils.default_headers()
     headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'})
@@ -32,11 +33,9 @@ def scanner():
             soup = BS(req.text, 'html.parser')
 
             if soup.find_all(string=match):
-                print("-> " + url)
                 logging.info(url)
         except requests.RequestException as e:
             pass
-        threads_queue.task_done()
 
 if __name__ == '__main__':
     
