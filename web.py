@@ -11,6 +11,17 @@ from bs4 import BeautifulSoup as BS
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+def arguments():
+    parser = argparse.ArgumentParser(prog='web.py', description='Web Scraper v1.0')
+    parser.add_argument("-i", "--ip", dest="ip", help='ip list file', required=True)
+    parser.add_argument("-u", "--uri", dest="uri", help='uri list file', required=True)
+    parser.add_argument("-l", "--log", dest="log", help="log to save results", required=True)
+    parser.add_argument("-p", "--port", dest="port", type=int, default=80, help="port number (default 80)")
+    parser.add_argument("-s", "--ssl", dest="ssl", help="use ssl or no")
+    parser.add_argument("-t", "--threads", dest="num_threads", type=int, default=50, help="number of threads (default 50)")
+    arg = parser.parse_args()
+    return arg
+
 def main():
     threads = []
     num_threads = arg.num_threads
@@ -20,7 +31,7 @@ def main():
         threads.append(th)
         th.start()
 
-    with open(arg.ip) as f1, open(arg.path) as f2:
+    with open(arg.ip) as f1, open(arg.uri) as f2:
         for url, uri in itertools.product(f1, f2):
             url = url.rstrip().strip()
             uri = uri.rstrip().strip()
@@ -60,16 +71,7 @@ def scanner():
 if __name__ == '__main__':
     
     threads_queue = queue.Queue(maxsize=0)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--ip", dest="ip", help='ip list file', required=True)
-    parser.add_argument("-u", "--uri", dest="path", help='uri list file', required=True)
-    parser.add_argument("-l", "--log", dest="log", help="log to save results", required=True)
-    parser.add_argument("-p", "--port", dest="port", help="port number (default 80)")
-    parser.add_argument("-s", "--ssl", dest="ssl", help="use ssl or no")
-    parser.add_argument("-t", "--threads", dest="num_threads", type=int, default=50, help="number of threads (default 50)")
-    arg = parser.parse_args()
-
+    arg = arguments()
     main()
 
 
