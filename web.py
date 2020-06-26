@@ -12,17 +12,27 @@ import itertools
 import threading
 import queue
 import sys
+import os
 from bs4 import BeautifulSoup as BS
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+
+def check_file(file):
+    """
+        Checks that file exists
+    """
+    if not os.path.exists(file):
+        raise argparse.ArgumentTypeError("{0} does not exist".format(file))
+    return file    
 
 def arguments():
     """
         Obviously these are the arguments.
     """    
     parser = argparse.ArgumentParser(prog='web.py', description='Web Scraper v1.0')
-    parser.add_argument("-i", "--ip", dest="ip", help='ip list file', required=True)
-    parser.add_argument("-u", "--uri", dest="uri", help='uri list file', required=True)
+    parser.add_argument("-i", "--ip", dest="ip", help='ip list file', type=check_file, required=True)
+    parser.add_argument("-u", "--uri", dest="uri", help='uri list file', type=check_file, required=True)
     parser.add_argument("-l", "--log", dest="log", help="log to save results", required=True)
     parser.add_argument("-p", "--port", dest="port", type=int, default=80, help="port number (default 80)")
     parser.add_argument("-t", "--threads", dest="num_threads", type=int, default=50, help="number of threads (default 50)")
@@ -72,7 +82,7 @@ def scanner():
     headers = requests.utils.default_headers()
     headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'})
 
-    match = ["It works!", "Test", "Univention Portal", "RouterOS router configuration page", "UniFi Network"]
+    match = ["It works!", "Test", "Univention Portal", "RouterOS router configuration page", "Stratis"]
 
     while True:
         url = threads_queue.get()
@@ -87,16 +97,17 @@ def scanner():
         if ssl is False:         
             try:
                 req = requests.get("http://" + url, headers=headers, timeout=3, allow_redirects=True, verify=False)
-                soup = BS(req.text, 'html.parser')
+                soup = BS(req.content, 'html.parser')
 
                 if soup.find_all(string=match):
+                    # print(req.history[0].headers['Location'])
                     logging.info("http://" + url)
             except requests.RequestException as err:
                 pass
         else:
             try:
                 req = requests.get("https://" + url, headers=headers, timeout=3, allow_redirects=True, verify=False)
-                soup = BS(req.text, 'html.parser')
+                soup = BS(req.content, 'html.parser')
 
                 if soup.find_all(string=match):
                     logging.info("https://" + url)
