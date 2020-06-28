@@ -20,7 +20,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def check_file(file):
     """
-        Checks that file exists
+        Checks if file exists
     """
     if not os.path.exists(file):
         raise argparse.ArgumentTypeError("{0} does not exist".format(file))
@@ -31,19 +31,19 @@ def arguments():
         Obviously these are the arguments.
     """    
     parser = argparse.ArgumentParser(prog='web.py', description='Web Scraper v1.0')
-    parser.add_argument("-i", "--ip", dest="ip", help='ip list file', type=check_file, required=True)
-    parser.add_argument("-u", "--uri", dest="uri", help='uri list file', type=check_file, required=True)
-    parser.add_argument("-l", "--log", dest="log", help="log to save results", required=True)
-    parser.add_argument("-p", "--port", dest="port", type=int, default=80, help="port number (default 80)")
-    parser.add_argument("-t", "--threads", dest="num_threads", type=int, default=50, help="number of threads (default 50)")
-    parser.add_argument("-s", "--ssl", dest="ssl", action="store_true", help="use ssl or no")
+    parser.add_argument("-i", "--ip", dest="ip", type=check_file, required=True, help='ip list file')
+    parser.add_argument("-u", "--uri", dest="uri", type=check_file, required=True, help='uri list file',)
+    parser.add_argument("-l", "--log", dest="log", default="results.txt", help="save the results (default: results.txt)")
+    parser.add_argument("-p", "--port", dest="port", type=int, default=80, help="port number (default: 80)")
+    parser.add_argument("-t", "--threads", dest="num_threads", type=int, default=100, help="number of threads (default: 100)")
+    parser.add_argument("-s", "--ssl", dest="ssl", action="store_true", help="use ssl (default: none)")
     arg = parser.parse_args()
     return arg
 
 def main():
     """
-        This is where we begin. We create a nested loop 
-        with itertools and we put in the queue() list.
+        This is where we begin. We create a nested loop with 
+        itertools.product() and we put in the queue() list.
     """
     threads = []
     num_threads = arg.num_threads
@@ -60,7 +60,6 @@ def main():
             url = url.rstrip().strip()
             uri = uri.rstrip().strip()
             threads_queue.put(url + ":" + port + uri)
-
     """
         This is the first part to break the loop.
         We add None to the list. To break the loop in 
@@ -82,12 +81,11 @@ def scanner():
     headers = requests.utils.default_headers()
     headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'})
 
-    match = ["It works!", "Test", "Univention Portal", "RouterOS router configuration page", "Stratis"]
+    match = ["What you want to match"]
 
     while True:
         url = threads_queue.get()
         ssl = arg.ssl
-
         """
             This is the second part to break the loop.
             I'll try to find a better way to try break the loop.
@@ -100,7 +98,6 @@ def scanner():
                 soup = BS(req.content, 'html.parser')
 
                 if soup.find_all(string=match):
-                    # print(req.history[0].headers['Location'])
                     logging.info("http://" + url)
             except requests.RequestException as err:
                 pass
@@ -113,8 +110,6 @@ def scanner():
                     logging.info("https://" + url)
             except requests.RequestException as err:
                 pass
-        
-
 
 if __name__ == '__main__':
     threads_queue = queue.Queue(maxsize=0)
