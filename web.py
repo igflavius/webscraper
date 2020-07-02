@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 __author__ = "Flavius Ion"
 __email__ = "igflavius@odyssee.ro"
@@ -43,12 +43,12 @@ def arguments():
 def main():
     """
         This is where we begin. We create a nested loop with 
-        itertools.product() and we put in the queue() list.
+        itertools.product() and we put in the queue().
     """
     threads = []
     num_threads = arg.num_threads
     port = str(arg.port)
-
+    
     # Multithread
     for i in range(num_threads):
         th = threading.Thread(target = scanner, daemon=True)
@@ -81,7 +81,7 @@ def scanner():
     headers = requests.utils.default_headers()
     headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'})
 
-    match = ["What you want to match"]
+    match = ["Powered by WordPress"]
 
     while True:
         url = threads_queue.get()
@@ -112,9 +112,13 @@ def scanner():
                 pass
 
 if __name__ == '__main__':
-    threads_queue = queue.Queue(maxsize=0)
-    arg = arguments()
-    main()
+    try:
+        threads_queue = queue.Queue(maxsize=0)
+        arg = arguments()
+        main()
+    except KeyboardInterrupt:
+        sys.exit(0)
+        print("[+] Ctrl + C ... Exiting")
 
 
 
