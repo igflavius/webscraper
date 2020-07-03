@@ -13,6 +13,7 @@ import threading
 import queue
 import sys
 import os
+import re
 from bs4 import BeautifulSoup as BS
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -81,7 +82,7 @@ def scanner():
     headers = requests.utils.default_headers()
     headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'})
 
-    match = ["Powered by WordPress"]
+    match = ["Powered by Wordpress"]
 
     while True:
         url = threads_queue.get()
@@ -95,18 +96,18 @@ def scanner():
         if ssl is False:         
             try:
                 req = requests.get("http://" + url, headers=headers, timeout=3, allow_redirects=True, verify=False)
-                soup = BS(req.content, 'html.parser')
+                soup = BS(req.text, 'html.parser')
 
-                if soup.find_all(string=match):
+                if soup.find_all(string=re.compile('|'.join(match))):
                     logging.info("http://" + url)
             except requests.RequestException as err:
                 pass
         else:
             try:
                 req = requests.get("https://" + url, headers=headers, timeout=3, allow_redirects=True, verify=False)
-                soup = BS(req.content, 'html.parser')
+                soup = BS(req.text, 'html.parser')
 
-                if soup.find_all(string=match):
+                if soup.find_all(string=re.compile('|'.join(match))):
                     logging.info("https://" + url)
             except requests.RequestException as err:
                 pass
