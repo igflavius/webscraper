@@ -15,7 +15,7 @@ import sys
 import os
 import re
 from bs4 import BeautifulSoup as BS
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
@@ -42,30 +42,27 @@ def arguments():
     return arg
 
 def main():
-    """
+    """ 
         This is where we begin. We create a nested loop with 
         itertools.product() and we put in the queue().
+        And setup first part to break the loop. 
     """
     threads = []
     num_threads = arg.num_threads
     port = str(arg.port)
     
     # Multithread
-    for i in range(num_threads):
+    for thread in range(num_threads):
         th = threading.Thread(target = scanner, daemon=True)
         threads.append(th)
         th.start()
 
-    with open(arg.ip) as f1, open(arg.path) as f2:
-        for url, path in itertools.product(f1, f2):
+    with open(arg.ip) as file1, open(arg.path) as file2:
+        for url, path in itertools.product(file1, file2):
             url = url.rstrip().strip()
             path = path.rstrip().strip()
             threads_queue.put(url + ":" + port + path)
-    """
-        This is the first part to break the loop.
-        We add None to the list. To break the loop in 
-        the scanner() function with an if statement.
-    """ 
+
     for thread in threads:
         threads_queue.put(None)
 
@@ -75,7 +72,8 @@ def main():
 def scanner():
     """ 
         In the scanner() function we get url from the queue.
-        and find the string in the urls.
+        And find the match in the urls.
+        And break the loop with an fif statment.
     """    
     logging.basicConfig(format='%(message)s', level=logging.INFO, handlers=[logging.FileHandler(arg.log), logging.StreamHandler(sys.stdout)])
 
@@ -87,10 +85,7 @@ def scanner():
     while True:
         url = threads_queue.get()
         ssl = arg.ssl
-        """
-            This is the second part to break the loop.
-            I'll try to find a better way to try break the loop.
-        """        
+       
         if url is None:
             break
         if ssl is False:         
@@ -99,8 +94,8 @@ def scanner():
                 soup = BS(req.text, 'html.parser')
 
                 if soup.find_all(string=re.compile('|'.join(match))):
-                    logging.info("http://" + url)
-            except requests.RequestException as err:
+                    logging.info("http://%s", url)
+            except requests.RequestException:
                 pass
         else:
             try:
@@ -108,9 +103,10 @@ def scanner():
                 soup = BS(req.text, 'html.parser')
 
                 if soup.find_all(string=re.compile('|'.join(match))):
-                    logging.info("https://" + url)
-            except requests.RequestException as err:
+                    logging.info("https://%s", url)
+            except requests.RequestException:
                 pass
+
 
 if __name__ == '__main__':
     try:
@@ -120,6 +116,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         sys.exit(0)
         print("[+] Ctrl + C ... Exiting")
-
-
-
