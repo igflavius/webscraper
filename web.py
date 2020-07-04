@@ -3,7 +3,7 @@
 __author__ = "Flavius Ion"
 __email__ = "igflavius@odyssee.ro"
 __license__ = "MIT"
-__version__ = "1.0"
+__version__ = "v1.1"
 
 import argparse
 import requests
@@ -31,13 +31,16 @@ def arguments():
     """
         Obviously these are the arguments.
     """    
-    parser = argparse.ArgumentParser(prog='web.py', description='Web Scraper v1.0')
-    parser.add_argument("-i", "--ip", dest="ip", type=check_file, required=True, help='ip list file')
-    parser.add_argument("-p", "--path", dest="path", type=check_file, required=True, help='path list file',)
-    parser.add_argument("-l", "--log", dest="log", default="results.txt", help="save the results (default: results.txt)")
-    parser.add_argument("--port", dest="port", type=int, default=80, help="port number (default: 80)")
-    parser.add_argument("-t", "--threads", dest="num_threads", type=int, default=100, help="number of threads (default: 100)")
-    parser.add_argument("--ssl", dest="ssl", action="store_true", help="use ssl (default: none)")
+    parser = argparse.ArgumentParser(add_help=False, description='Web Scraper ' + __version__)
+    required = parser.add_argument_group('required arguments')
+    optional = parser.add_argument_group('optional arguments')
+    required.add_argument("-i", "--ip", dest="ip", type=check_file, required=True, help='ip list file')
+    required.add_argument("-p", "--path", dest="path", type=check_file, required=True, help='path list file',)
+    optional.add_argument("-l", "--log", dest="log", default="results.txt", help="save the results (default: results.txt)")
+    optional.add_argument("--port", dest="port", type=int, default=80, help="port number (default: 80)")
+    optional.add_argument("-t", "--threads", dest="num_threads", type=int, default=100, help="number of threads (default: 100)")
+    optional.add_argument("--ssl", dest="ssl", action="store_true", help="use ssl (default: none)")
+    optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
     arg = parser.parse_args()
     return arg
 
@@ -80,7 +83,7 @@ def scanner():
     headers = requests.utils.default_headers()
     headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'})
 
-    string = ["Powered by Wordpress"]
+    string = ["Powered by WordPress"]
 
     while True:
         url = threads_queue.get()
@@ -116,3 +119,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         sys.exit(0)
         print("[+] Ctrl + C ... Exiting")
+        
