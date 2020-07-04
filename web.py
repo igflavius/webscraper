@@ -72,7 +72,7 @@ def main():
 def scanner():
     """ 
         In the scanner() function we get url from the queue.
-        And find the match in the urls.
+        And find the string in the urls.
         And break the loop with an fif statment.
     """    
     logging.basicConfig(format='%(message)s', level=logging.INFO, handlers=[logging.FileHandler(arg.log), logging.StreamHandler(sys.stdout)])
@@ -80,7 +80,7 @@ def scanner():
     headers = requests.utils.default_headers()
     headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'})
 
-    match = ["Powered by Wordpress"]
+    string = ["Powered by Wordpress"]
 
     while True:
         url = threads_queue.get()
@@ -93,7 +93,7 @@ def scanner():
                 req = requests.get("http://" + url, headers=headers, timeout=3, allow_redirects=True, verify=False)
                 soup = BS(req.text, 'html.parser')
 
-                if soup.find_all(string=re.compile('|'.join(match))):
+                if soup.find_all(string=re.compile('|'.join(string))):
                     logging.info("http://%s", url)
             except requests.RequestException:
                 pass
@@ -102,7 +102,7 @@ def scanner():
                 req = requests.get("https://" + url, headers=headers, timeout=3, allow_redirects=True, verify=False)
                 soup = BS(req.text, 'html.parser')
 
-                if soup.find_all(string=re.compile('|'.join(match))):
+                if soup.find_all(string=re.compile('|'.join(string))):
                     logging.info("https://%s", url)
             except requests.RequestException:
                 pass
