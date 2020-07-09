@@ -3,7 +3,7 @@
 __author__ = "Flavius Ion"
 __email__ = "igflavius@odyssee.ro"
 __license__ = "MIT"
-__version__ = "v1.1"
+__version__ = "v1.2"
 
 import argparse
 import requests
@@ -14,7 +14,7 @@ import queue
 import sys
 import os
 import re
-from bs4 import BeautifulSoup as BS
+from bs4 import BeautifulSoup
 from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
@@ -38,7 +38,7 @@ def arguments():
     required.add_argument("-p", "--path", dest="path", type=check_file, required=True, help='path list file',)
     optional.add_argument("-l", "--log", dest="log", default="results.txt", help="save the results (default: results.txt)")
     optional.add_argument("--port", dest="port", type=int, default=80, help="port number (default: 80)")
-    optional.add_argument("-t", "--threads", dest="num_threads", type=int, default=100, help="number of threads (default: 100)")
+    optional.add_argument("--threads", dest="num_threads", type=int, default=100, help="number of threads (default: 100)")
     optional.add_argument("--ssl", dest="ssl", action="store_true", help="use ssl (default: none)")
     optional.add_argument("-h", "--help", action="help", help="show this help message and exit")
     arg = parser.parse_args()
@@ -76,14 +76,14 @@ def scanner():
     """ 
         In the scanner() function we get url from the queue.
         And find the string in the urls.
-        And break the loop with an fif statment.
+        And break the loop with an if statment.
     """    
     logging.basicConfig(format='%(message)s', level=logging.INFO, handlers=[logging.FileHandler(arg.log), logging.StreamHandler(sys.stdout)])
 
     headers = requests.utils.default_headers()
     headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'})
 
-    string = ["Powered by WordPress"]
+    keywords = ["Powered by WordPress", "Powered by Joomla"]
 
     while True:
         url = threads_queue.get()
@@ -94,18 +94,18 @@ def scanner():
         if ssl is False:         
             try:
                 req = requests.get("http://" + url, headers=headers, timeout=3, allow_redirects=True, verify=False)
-                soup = BS(req.text, 'html.parser')
+                soup = BeautifulSoup(req.text, 'html.parser')
 
-                if soup.find_all(string=re.compile('|'.join(string))):
+                if soup.find_all(string=re.compile('|'.join(keywords))):
                     logging.info("http://%s", url)
             except requests.RequestException:
                 pass
         else:
             try:
                 req = requests.get("https://" + url, headers=headers, timeout=3, allow_redirects=True, verify=False)
-                soup = BS(req.text, 'html.parser')
+                soup = BeautifulSoup(req.text, 'html.parser')
 
-                if soup.find_all(string=re.compile('|'.join(string))):
+                if soup.find_all(string=re.compile('|'.join(keywords))):
                     logging.info("https://%s", url)
             except requests.RequestException:
                 pass
