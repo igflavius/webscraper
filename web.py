@@ -75,7 +75,7 @@ def main():
 
 def scanner():
     """ 
-        Retrive urls from the queue.
+        Get urls from the queue.
         And find the keywords in the urls.
         And break the loop with an if statment.
     """    
