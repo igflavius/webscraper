@@ -1,8 +1,7 @@
 # Web Scraper
 
 The main goal of program is to scrape urls based on keywords.\
-It is more easy to find what you looking for.\
-Adjust keywords to your needs.
+It is more easy to find what you looking for.
 
 #### Usage
 
