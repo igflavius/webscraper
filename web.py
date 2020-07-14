@@ -3,7 +3,7 @@
 __author__ = "Flavius Ion"
 __email__ = "igflavius@odyssee.ro"
 __license__ = "MIT"
-__version__ = "v1.2"
+__version__ = "v1.3"
 
 import argparse
 import requests
@@ -48,7 +48,7 @@ def main():
     """ 
         This is where we begin. We create a nested loop with 
         itertools.product() and we put in the queue().
-        And setup first part to break the loop. 
+        Set first part to break the loop. 
     """
     threads = []
     num_threads = arg.num_threads
@@ -60,22 +60,23 @@ def main():
         threads.append(th)
         th.start()
 
+    # add url, port and path in queue() 
     with open(arg.ip) as file1, open(arg.path) as file2:
         for url, path in itertools.product(file1, file2):
             url = url.rstrip().strip()
             path = path.rstrip().strip()
             threads_queue.put(url + ":" + port + path)
 
+    # add None to the end queue() to break the loop
     for thread in threads:
         threads_queue.put(None)
-
     for thread in threads:
         thread.join()
 
 def scanner():
     """ 
-        In the scanner() function we get url from the queue.
-        And find the string in the urls.
+        Get urls from the queue.
+        And find the keywords in the urls.
         And break the loop with an if statment.
     """    
     logging.basicConfig(format='%(message)s', level=logging.INFO, handlers=[logging.FileHandler(arg.log), logging.StreamHandler(sys.stdout)])
